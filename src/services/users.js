@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { compare, hash } from "bcryptjs";
+import { v4 as uuidv4 } from "uuid";
 
 const filePath = path.join(process.cwd(), "src", "data", "users.json");
 
@@ -21,7 +22,6 @@ export function getByEmail(email) {
 
 export async function verifyPassword(hashedPassword, password) {
   const isValid = await compare(password, hashedPassword);
-  console.log(isValid);
   return isValid;
 }
 
@@ -29,12 +29,21 @@ export async function save(firstName, lastName, email, password) {
   const data = getAll();
   const hashedPassword = await hash(password, 12);
   data.push({
-    id: data.length + 1,
+    id: uuidv4(),
     firstName,
     lastName,
     email,
     password: hashedPassword,
-    blogs:[],
+    blogs: [],
   });
   fs.writeFileSync(filePath, JSON.stringify(data));
+}
+
+export function saveAll(users) {
+  try {
+    fs.writeFileSync(filePath, JSON.stringify(users, null, 2));
+    console.log("Data saved successfully.");
+  } catch (error) {
+    console.error("Failed to save data:", error);
+  }
 }
