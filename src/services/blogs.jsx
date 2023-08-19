@@ -1,27 +1,36 @@
 import fs from "fs";
 import path from "path";
+import { getAll } from "./users";
 
-const filePath = path.join(process.cwd(), "src", "data", "blogs.json");
+const filePath = path.join(process.cwd(), "src", "data", "users.json");
 
-export function existingBlogs() {
-  const data = fs.readFileSync(filePath, "utf-8");
-  return JSON.parse(data);
-}
+export function publishBlog(title, description, dateTime , email) {
+  const users = getAll();
 
-export default function publishBlog(title, description, dateTime) {
-  const existingData = existingBlogs();
+  const userData = users.find((user) => {
+    return user.email === email;
+  });
+
   const newBlog = {
     title,
     description,
     dateTime,
   };
 
-  existingData.push(newBlog);
+  userData.blogs.push(newBlog);
 
   try {
-    fs.writeFileSync(filePath, JSON.stringify(existingData));
-    console.log("Blog published successfully.");
+    fs.writeFileSync(filePath, JSON.stringify(users));
+    alert("Blog published successfully.");
   } catch (error) {
     console.error("Failed to publish blog:", error);
   }
+}
+
+export function userBlogs(email) {
+  const users = getAll();
+  const userData = users.find((user) => {
+    return user.email === email;
+  });
+  return userData.blogs;
 }
