@@ -1,1 +1,83 @@
-[{"id":1,"firstName":"MUHAMMAD MUDDUSSIR","lastName":"dfsf","email":"muddussir1242@gmail.com","password":"$2a$12$OhJSY64hj5K36wA116Po.erGUPT5KRPjaBrO8HcvfW6ryQ2kb8eb6"}]
+[
+  {
+    "id": 1,
+    "firstName": "sadsad",
+    "lastName": "dass",
+    "email": "muddussir1242@gmail.com",
+    "password": "$2a$12$D.T6GQBQi06fYVC.ygpGIuI9kTX8nisADwrSPoGQ0j8tOZywPWVt2",
+    "blogs": [
+      {
+        "title": "sadsad",
+        "description": "dcdss",
+        "dateTime": "August 19, 2023 at 11:28 PM"
+      },
+      {
+        "title": "sadsad",
+        "description": "dcdss",
+        "dateTime": "August 19, 2023 at 11:28 PM"
+      },
+      {
+        "title": "sadsad",
+        "description": "dcdss",
+        "dateTime": "August 19, 2023 at 11:28 PM"
+      },
+      {
+        "title": "sadsad",
+        "description": "dcdss",
+        "dateTime": "August 19, 2023 at 11:28 PM"
+      },
+      {
+        "title": "sadsad",
+        "description": "dcdss",
+        "dateTime": "August 19, 2023 at 11:28 PM"
+      },
+      {
+        "title": "sadsad",
+        "description": "dcdss",
+        "dateTime": "August 19, 2023 at 11:28 PM"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "firstName": "MUHAMMAD MUDDUSSIR",
+    "lastName": "sds",
+    "email": "muddussir1247@gmail.com",
+    "password": "$2a$12$HYi2hm9DMjNfNLpvtauhqej4yUDv.Q5a9qMHyqSjDn66VsBhQ/N3y",
+    "blogs": [
+      {
+        "title": "saddsa",
+        "description": "lkdsnmlkcmds",
+        "dateTime": "August 19, 2023 at 11:30 PM"
+      },
+      {
+        "title": "saddsa",
+        "description": "lkdsnmlkcmds",
+        "dateTime": "August 19, 2023 at 11:30 PM"
+      },
+      {
+        "title": "saddsa",
+        "description": "lkdsnmlkcmds",
+        "dateTime": "August 19, 2023 at 11:30 PM"
+      },
+      {
+        "title": "saddsa",
+        "description": "lkdsnmlkcmds",
+        "dateTime": "August 19, 2023 at 11:30 PM"
+      },
+      {
+        "title": "saddsa",
+        "description": "lkdsnmlkcmds",
+        "dateTime": "August 19, 2023 at 11:30 PM"
+      }
+    ]
+  },
+  {
+    "id": "5f0cf3d4-c689-4e56-8bcb-b9dd572b5d14",
+    "firstName": "sdf",
+    "lastName": "HHJ",
+    "email": "muddussir1248@gmail.com",
+    "password": "$2a$12$9l3ocloj/Uunbn13Z49Lue9Wpi4NQMooxim70rBbIaWBDpqBBFx8C",
+    "blogs": []
+  }
+]
