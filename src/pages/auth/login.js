@@ -1,6 +1,6 @@
 import Headings from "@/components/Headings";
 import MyHeader from "@/components/MyHeader";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useRef } from "react";
@@ -9,6 +9,7 @@ export default function Form(email, password) {
   const emailRef = useRef();
   const passwordRef = useRef();
   const router = useRouter();
+  const {data} = useSession()
   
   const onSubmitHandler =async (e) => {
     e.preventDefault();
@@ -16,7 +17,6 @@ export default function Form(email, password) {
     const password = passwordRef.current.value;
     
    const response =  await signIn("credentials", { redirect: false, email, password });
-   console.log(response);
    if (response.ok) {
     router.push("/DashBoard")
    }
