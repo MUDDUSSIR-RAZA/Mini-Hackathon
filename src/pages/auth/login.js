@@ -6,28 +6,35 @@ import { useRouter } from "next/router";
 import { useRef } from "react";
 
 export default function Form(email, password) {
+  const router = useRouter();
+  const { data } = useSession();
+  if (data) {
+    router.replace("/DashBoard");
+  }
   const emailRef = useRef();
   const passwordRef = useRef();
-  const router = useRouter();
-  
-  const onSubmitHandler =async (e) => {
+
+  const onSubmitHandler = async (e) => {
     e.preventDefault();
     const email = emailRef.current.value;
     const password = passwordRef.current.value;
-    
-   const response =  await signIn("credentials", { redirect: false, email, password });
-   if (response.ok) {
-    router.replace("/DashBoard")
-   }
-   else {
-    console.error(response.error);
-    alert("User Not Exist")
-   }
+
+    const response = await signIn("credentials", {
+      redirect: false,
+      email,
+      password,
+    });
+    if (response.ok) {
+      router.replace("/DashBoard");
+    } else {
+      console.error(response.error);
+      alert("User Not Exist");
+    }
   };
   return (
     <>
       <MyHeader>
-      <Link href={"/auth/signup"}>Sign Up</Link>
+        <Link href={"/auth/signup"}>Sign Up</Link>
       </MyHeader>
       <Headings headingName={"SIGNIN PAGE"} />
       <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
