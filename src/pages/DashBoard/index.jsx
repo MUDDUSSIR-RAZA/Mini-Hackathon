@@ -7,8 +7,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { userBlogs } from "@/services/blogs";
 import { useRouter } from "next/router";
+import { getByEmail } from "@/services/users";
 
-const DashBoard = ({ blogs }) => {
+const DashBoard = ({ blogs ,user }) => {
   const { data } = useSession();
 
   const titleRef = useRef();
@@ -50,7 +51,7 @@ const DashBoard = ({ blogs }) => {
 
   return (
     <>
-      <MyHeader>
+      <MyHeader name={user.firstName}>
         <Link
           style={{
             marginRight: "8px",
@@ -143,7 +144,7 @@ const DashBoard = ({ blogs }) => {
                 src={
                   "https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg?auto=compress&cs=tinysrgb&w=600"
                 }
-                width={100}
+                width={90}
                 height={100}
                 alt={`Picture of ${blog.title}`}
                 style={{
@@ -168,7 +169,10 @@ const DashBoard = ({ blogs }) => {
               >
                 {blog.title}
               </h1>
-              <span>{blog.dateTime}</span>
+              <span style={{
+                  fontSize: "10px",
+                  fontWeight: "lighter",
+                }}>{user.firstName} - {blog.dateTime}</span>
             </div>
           </div>
           <br />
@@ -195,11 +199,13 @@ export async function getServerSideProps({ req }) {
   }
   const userEmail = session.user.email;
   const blogs = await userBlogs(userEmail);
+  const user = await getByEmail(userEmail)
 
   return {
     props: {
       session,
       blogs,
+      user,
     },
   };
 }
