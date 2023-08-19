@@ -1,15 +1,23 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Headings from "@/components/Headings";
 import MyHeader from "@/components/MyHeader";
-import { getSession, signOut } from "next-auth/react";
+import { getSession, signOut, useSession } from "next-auth/react";
 import { BiSolidUserCircle } from "react-icons/bi";
 import Link from "next/link";
-import { existingBlogs } from "@/services/blogs";
 import Image from "next/image";
+import { userBlogs } from "@/services/blogs";
+import { useRouter } from "next/router";
 
 const DashBoard = ({ blogs }) => {
+  const { data } = useSession();
+
   const titleRef = useRef();
   const descriptionRef = useRef();
+
+  function email() {
+    const user = data?.user;
+    return user?.email;
+  }
 
   const currentDate = new Date();
 
@@ -30,13 +38,15 @@ const DashBoard = ({ blogs }) => {
 
     const response = await fetch("/api/blogs/publishBlogs", {
       method: "POST",
-      body: JSON.stringify({ title, description, dateTime }),
+      body: JSON.stringify({ title, description, dateTime, email: email() }),
       headers: {
         "Content-Type": "application/json",
       },
     });
-    alert("Blog Publish Successfully")
+    alert("Blog Publish Successfully");
   };
+
+  const router = useRouter();
 
   return (
     <>
@@ -51,7 +61,14 @@ const DashBoard = ({ blogs }) => {
         >
           <BiSolidUserCircle />
         </Link>
-        <button onClick={signOut}>Log Out</button>
+        <button
+          onClick={async () => {
+            await signOut();
+            router.push("/auth/login");
+          }}
+        >
+          Log Out
+        </button>
       </MyHeader>
       <Headings headingName={"DASH BOARD"} />
 
@@ -115,7 +132,7 @@ const DashBoard = ({ blogs }) => {
         ""
       )}
 
-{blogs.map((blog, index) => (
+      {blogs.map((blog, index) => (
         <div
           key={index}
           className="mt-10 sm:mx-auto sm:w-full sm:max-w-4xl p-3 bg-white rounded-md shadow-lg border border-gray-300 m-6"
@@ -123,7 +140,9 @@ const DashBoard = ({ blogs }) => {
           <div style={{ display: "flex", alignItems: "center" }}>
             <div>
               <Image
-                src={"https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg?auto=compress&cs=tinysrgb&w=600"} 
+                src={
+                  "https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg?auto=compress&cs=tinysrgb&w=600"
+                }
                 width={100}
                 height={100}
                 alt={`Picture of ${blog.title}`}
@@ -164,10 +183,9 @@ export default DashBoard;
 
 export async function getServerSideProps({ req }) {
   const session = await getSession({ req });
-  const data = await existingBlogs();
 
-  console.log(data);
-  if (!session) {
+  
+  if (!session || !session.user || !session.user.email) {
     return {
       redirect: {
         destination: "/auth/login",
@@ -175,10 +193,13 @@ export async function getServerSideProps({ req }) {
       },
     };
   }
+  const userEmail = session.user.email;
+  const blogs = await userBlogs(userEmail);
+
   return {
     props: {
       session,
-      blogs: data,
+      blogs,
     },
   };
 }
