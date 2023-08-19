@@ -6,7 +6,7 @@ import { BsPen } from "react-icons/bs";
 import { getSession, signOut } from "next-auth/react";
 import { RxDashboard } from "react-icons/rx";
 import Link from "next/link";
-import { getByEmail, verifyPassword } from "@/services/users";
+import { getByEmail } from "@/services/users";
 
 const ProfilePage = ({ user }) => {
   const oldPasswordRef = useRef();
@@ -18,7 +18,6 @@ const ProfilePage = ({ user }) => {
     const oldPassword = oldPasswordRef.current.value;
     const password = passwordRef.current.value;
     const confirmPassword = confirmPasswordRef.current.value;
-
   };
 
   const nameButton = () => {
