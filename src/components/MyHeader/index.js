@@ -3,7 +3,7 @@ import { Layout } from "antd";
 import Link from "next/link";
 const { Header } = Layout;
 
-const MyHeader = () => {
+const MyHeader = ({children}) => {
   return (
     <>
       <Header
@@ -38,9 +38,10 @@ const MyHeader = () => {
             Muddussir Raza
           </div>
           <div style={{
-              fontSize:"12px"
+              fontSize:"12px",
+              display: "flex",
             }}>
-            <Link href={"/auth/signup"}>Sign Up</Link>
+           {children}
           </div>
         </div>
       </Header>

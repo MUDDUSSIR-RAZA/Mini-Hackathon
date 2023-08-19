@@ -1,11 +1,35 @@
 import Headings from "@/components/Headings";
 import MyHeader from "@/components/MyHeader";
+import { signIn } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import { useRef } from "react";
 
-export default function Form({ signin }) {
+export default function Form(email, password) {
+  const emailRef = useRef();
+  const passwordRef = useRef();
+  const router = useRouter();
+  
+  const onSubmitHandler =async (e) => {
+    e.preventDefault();
+    const email = emailRef.current.value;
+    const password = passwordRef.current.value;
+    
+   const response =  await signIn("credentials", { redirect: false, email, password });
+   console.log(response);
+   if (response.ok) {
+    router.push("/DashBoard")
+   }
+   else {
+    console.error(response.error);
+    alert("User Not Exist")
+   }
+  };
   return (
     <>
-      <MyHeader />
+      <MyHeader>
+      <Link href={"/auth/signup"}>Sign Up</Link>
+      </MyHeader>
       <Headings headingName={"SIGNIN PAGE"} />
       <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
@@ -15,13 +39,14 @@ export default function Form({ signin }) {
         </div>
 
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm p-8 bg-white rounded-md shadow-lg border border-gray-300">
-          <form className="space-y-6" action="#" method="POST">
+          <form className="space-y-6" onSubmit={onSubmitHandler}>
             <div>
               <div className="mt-2 py-1">
                 <input
                   id="email"
                   name="email"
                   type="email"
+                  ref={emailRef}
                   placeholder="Email"
                   autoComplete="email"
                   required
@@ -34,6 +59,7 @@ export default function Form({ signin }) {
                   id="password"
                   name="password"
                   type="password"
+                  ref={passwordRef}
                   placeholder="Password"
                   autoComplete="current-password"
                   required
@@ -41,16 +67,7 @@ export default function Form({ signin }) {
                 />
               </div>
             </div>
-            <div className="flex items-center justify-between">
-              <div className="text-sm">
-                <Link
-                  href="/auth/signup"
-                  className="font-semibold text-indigo-600 hover:text-indigo-500"
-                >
-                  Do not have an account? Signup
-                </Link>
-              </div>
-            </div>
+
             <div>
               <button
                 type="submit"

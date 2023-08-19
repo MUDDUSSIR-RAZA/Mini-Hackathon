@@ -3,20 +3,45 @@ import Headings from "@/components/Headings";
 import MyHeader from "@/components/MyHeader";
 import Image from "next/image";
 import { BsPen } from "react-icons/bs";
+import { getSession, signOut } from "next-auth/react";
+import { RxDashboard } from "react-icons/rx";
 import Link from "next/link";
 
 const ProfilePage = () => {
   return (
     <>
-      <MyHeader />
+      <MyHeader>
+        <Link
+          style={{
+            marginRight: "8px",
+            fontSize: "23px",
+            alignSelf: "center",
+          }}
+          href={"/DashBoard"}
+        >
+          <RxDashboard />
+        </Link>
+        <button onClick={signOut}>Log Out</button>
+      </MyHeader>
       <Headings headingName={"PROFILE PAGE"} />
 
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm p-8 bg-white rounded-md shadow-lg border border-gray-300">
         <div
           style={{
-            padding: "0px 0px 20px 0px",
+            position: "relative",
           }}
         >
+          <div
+            style={{
+              position: "absolute",
+              top: "90%",
+              left: "40%",
+              transform: "translate(-50%, -50%)",
+              zIndex: 1,
+            }}
+          >
+            <BsPen />
+          </div>
           <Image
             src="https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg?auto=compress&cs=tinysrgb&w=600"
             width={150}
@@ -31,13 +56,16 @@ const ProfilePage = () => {
           style={{
             display: "flex",
             alignItems: "center",
-            fontSize:"14px"
+            fontSize: "14px",
+            padding: "20px 0px 0px 0px",
           }}
         >
           <span>Muddussir Raza</span>
-          <span style={{
-            marginLeft:"6px"
-          }}>
+          <span
+            style={{
+              marginLeft: "6px",
+            }}
+          >
             <BsPen />
           </span>
         </div>
@@ -97,3 +125,20 @@ const ProfilePage = () => {
 };
 
 export default ProfilePage;
+
+export async function getServerSideProps({ req }) {
+  const session = await getSession({ req });
+  if (!session) {
+    return {
+      redirect: {
+        destination: "/auth/login",
+        permanent: false,
+      },
+    };
+  }
+  return {
+    props: {
+      session,
+    },
+  };
+}

@@ -1,27 +1,57 @@
 import Headings from "@/components/Headings";
 import MyHeader from "@/components/MyHeader";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import { useRef } from "react";
 
-export default function Form({ signin }) {
+export default function Form() {
+  const firstNameRef = useRef();
+  const lastNameRef = useRef();
+  const emailRef = useRef();
+  const passwordRef = useRef();
+  const router = useRouter();
+
+  const onSubmitHandler = async (e) => {
+    e.preventDefault();
+    const firstName = firstNameRef.current.value;
+    const lastName = lastNameRef.current.value;
+    const email = emailRef.current.value;
+    const password = passwordRef.current.value;
+
+    const response = await fetch("/api/auth/signup", {
+      method: "POST",
+      body: JSON.stringify({ firstName, lastName, email, password }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.ok) {
+      alert("Sign up Succesful");
+      router.push("/auth/login");
+    }
+  };
   return (
     <>
-      <MyHeader />
+      <MyHeader>
+        <Link href={"/auth/login"}>Log In</Link>
+      </MyHeader>
       <Headings headingName={"SIGNUP PAGE"} />
       <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
           <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
-            {signin ? "Sign in to your account" : "Signup for new account"}
+            Signup for new account
           </h2>
         </div>
 
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm p-8 bg-white rounded-md shadow-lg border border-gray-300">
-          <form className="space-y-6" action="#" method="POST">
+          <form className="space-y-6" onSubmit={onSubmitHandler}>
             <div>
               <div className="mt-2 py-1">
                 <input
-                  id="first-name"
-                  name="first-name"
-                  type="first-name"
+                  id="firstName"
+                  name="firstName"
+                  type="firstName"
+                  ref={firstNameRef}
                   placeholder="First Name"
                   autoComplete="first-name"
                   required
@@ -31,9 +61,10 @@ export default function Form({ signin }) {
 
               <div className="mt-2 py-1">
                 <input
-                  id="last-name"
+                  id="lastName"
                   name="last-name"
-                  type="last-name"
+                  type="lastName"
+                  ref={lastNameRef}
                   placeholder="Last Name"
                   autoComplete="last-name"
                   required
@@ -46,6 +77,7 @@ export default function Form({ signin }) {
                   id="email"
                   name="email"
                   type="email"
+                  ref={emailRef}
                   placeholder="Email"
                   autoComplete="email"
                   required
@@ -58,6 +90,7 @@ export default function Form({ signin }) {
                   id="password"
                   name="password"
                   type="password"
+                  ref={passwordRef}
                   placeholder="Password"
                   autoComplete="current-password"
                   required
@@ -67,8 +100,8 @@ export default function Form({ signin }) {
 
               <div className="mt-2 py-1">
                 <input
-                  id="password"
-                  name="password"
+                  id="repeatPassword"
+                  name="repeatPassword"
                   type="password"
                   placeholder="Repeat Password"
                   autoComplete="current-password"
@@ -77,16 +110,7 @@ export default function Form({ signin }) {
                 />
               </div>
             </div>
-            <div className="flex items-center justify-between">
-              <div className="text-sm">
-                <Link
-                  href="/auth/login"
-                  className="font-semibold text-indigo-600 hover:text-indigo-500"
-                >
-                  Already have an account? Sign in
-                </Link>
-              </div>
-            </div>
+
             <div>
               <button
                 type="submit"
