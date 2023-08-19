@@ -48,7 +48,7 @@ export default function Form() {
   
     if (response.ok) {
       alert("Sign up Successful");
-      router.push("/auth/login");
+      router.replace("/auth/login");
     } else {
       const data = await response.json();
       alert(`Sign up failed: ${data.message}`);
