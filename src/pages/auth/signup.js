@@ -8,8 +8,9 @@ export default function Form() {
   const firstNameRef = useRef();
   const lastNameRef = useRef();
   const emailRef = useRef();
-  const passwordRef = useRef();
   const router = useRouter();
+  const passwordRef = useRef();
+  const repeatPasswordRef = useRef();
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
@@ -17,7 +18,26 @@ export default function Form() {
     const lastName = lastNameRef.current.value;
     const email = emailRef.current.value;
     const password = passwordRef.current.value;
+    const repeatPassword = repeatPasswordRef.current.value;
+  
+    if (password !== repeatPassword) {
+      alert("Both Password do not match.");
+      return;
+    }
 
+    if (password.length < 8) {
+      alert("Password must have at least 8 characters.");
+      return;
+    }
+  
+    const hasCapitalLetter = /[A-Z]/.test(password);
+    const hasSmallLetter = /[a-z]/.test(password);
+  
+    if (!hasCapitalLetter || !hasSmallLetter) {
+      alert("Password must contain both capital and small letters.");
+      return;
+    }
+  
     const response = await fetch("/api/auth/signup", {
       method: "POST",
       body: JSON.stringify({ firstName, lastName, email, password }),
@@ -25,9 +45,13 @@ export default function Form() {
         "Content-Type": "application/json",
       },
     });
+  
     if (response.ok) {
-      alert("Sign up Succesful");
+      alert("Sign up Successful");
       router.push("/auth/login");
+    } else {
+      const data = await response.json();
+      alert(`Sign up failed: ${data.message}`);
     }
   };
   return (
@@ -103,6 +127,7 @@ export default function Form() {
                   id="repeatPassword"
                   name="repeatPassword"
                   type="password"
+                  ref={repeatPasswordRef}
                   placeholder="Repeat Password"
                   autoComplete="current-password"
                   required
