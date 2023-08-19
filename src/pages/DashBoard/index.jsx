@@ -65,7 +65,7 @@ const DashBoard = ({ blogs ,user }) => {
         <button
           onClick={async () => {
             await signOut();
-            router.push("/auth/login");
+            router.replace("/auth/login");
           }}
         >
           Log Out
