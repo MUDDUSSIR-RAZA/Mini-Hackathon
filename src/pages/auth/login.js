@@ -17,7 +17,7 @@ export default function Form(email, password) {
     
    const response =  await signIn("credentials", { redirect: false, email, password });
    if (response.ok) {
-    router.push("/DashBoard")
+    router.replace("/DashBoard")
    }
    else {
     console.error(response.error);
