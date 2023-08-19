@@ -9,7 +9,6 @@ export default function Form(email, password) {
   const emailRef = useRef();
   const passwordRef = useRef();
   const router = useRouter();
-  const {data} = useSession()
   
   const onSubmitHandler =async (e) => {
     e.preventDefault();
