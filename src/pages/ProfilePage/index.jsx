@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef } from "react";
 import Headings from "@/components/Headings";
 import MyHeader from "@/components/MyHeader";
 import Image from "next/image";
@@ -6,21 +6,23 @@ import { BsPen } from "react-icons/bs";
 import { getSession, signOut } from "next-auth/react";
 import { RxDashboard } from "react-icons/rx";
 import Link from "next/link";
-import { getByEmail } from "@/services/users";
+import { getByEmail, verifyPassword } from "@/services/users";
 
 const ProfilePage = ({ user }) => {
-  const [editingFirstName, setEditingFirstName] = useState(false);
+  const oldPasswordRef = useRef();
+  const passwordRef = useRef();
+  const confirmPasswordRef = useRef();
+
+  const onSubmitHandler = async (e) => {
+    e.preventDefault();
+    const oldPassword = oldPasswordRef.current.value;
+    const password = passwordRef.current.value;
+    const confirmPassword = confirmPasswordRef.current.value;
+
+  };
+
   const nameButton = () => {
-    setEditingFirstName(!editingFirstName);
-  };
-
-  const handleFirstNameChange = (event) => {
-    setNewFirstName(event.target.value);
-  };
-
-  const handleUpdateFirstName = async () => {
-    await updateFirstName(newFirstName);
-    setEditingFirstName(false);
+    console.log("clicked");
   };
   return (
     <>
@@ -74,29 +76,26 @@ const ProfilePage = ({ user }) => {
             padding: "20px 0px 0px 0px",
           }}
         >
-          {editingFirstName ? (
-            <input
-              type="text"
-              value={user.firstName}
-              onChange={(e) => user.setFirstName(e.target.value)}
-              // Other input attributes
-            />
-          ) : (
-            <span>{user.firstName}</span>
-          )}
-          <button onClick={nameButton} style={{ marginLeft: "6px" }}>
+          <span>{user.firstName}</span>
+          <button
+            onClick={nameButton}
+            style={{
+              marginLeft: "6px",
+            }}
+          >
             <BsPen />
           </button>
         </div>
         <br />
         <h1>PASSWORD</h1>
-        <form className="space-y-6" action="#" method="POST">
+        <form className="space-y-6" onSubmit={onSubmitHandler}>
           <div>
             <div className="mt-2 py-1">
               <input
                 id="oldPassword"
                 name="oldPassword"
                 type="oldPassword"
+                ref={oldPasswordRef}
                 placeholder="Old Password"
                 autoComplete="current-password"
                 required
@@ -109,6 +108,7 @@ const ProfilePage = ({ user }) => {
                 id="newPassword"
                 name="newPassword"
                 type="newPassword"
+                ref={passwordRef}
                 placeholder="New Password"
                 autoComplete="newPassword"
                 required
@@ -121,6 +121,7 @@ const ProfilePage = ({ user }) => {
                 id="confirmPassword"
                 name="confirmPassword"
                 type="confirmPassword"
+                ref={confirmPasswordRef}
                 placeholder="Confirm Password"
                 autoComplete="confirmPassword"
                 required
