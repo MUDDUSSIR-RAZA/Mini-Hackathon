@@ -6,11 +6,10 @@ import { BiSolidUserCircle } from "react-icons/bi";
 import Link from "next/link";
 import Image from "next/image";
 import { userBlogs } from "@/services/blogs";
-import { useRouter } from "next/router";
 import { getByEmail } from "@/services/users";
 
-const DashBoard = ({ blogs ,user }) => {
-  
+const DashBoard = ({ blogs, user }) => {
+  const { data } = useSession();
 
   const titleRef = useRef();
   const descriptionRef = useRef();
@@ -46,8 +45,6 @@ const DashBoard = ({ blogs ,user }) => {
     });
     alert("Blog Publish Successfully");
   };
-
-
 
   return (
     <>
@@ -88,6 +85,8 @@ const DashBoard = ({ blogs ,user }) => {
                 ref={titleRef}
                 placeholder="Title"
                 required
+                minLength="5"
+                maxLength="30"
                 className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 px-2 py-2"
               />
             </div>
@@ -99,7 +98,13 @@ const DashBoard = ({ blogs ,user }) => {
                 ref={descriptionRef}
                 placeholder="Description"
                 required
-                rows={4} // Adjust the number of rows as needed
+                minLength="100"
+                maxLength="3000"
+                rows={4}
+                style={{
+                  maxHeight: "150px",
+                  overflowY: "auto",
+                }}
                 className="block w-full rounded-md border-0 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 px-2"
               />
             </div>
@@ -133,52 +138,66 @@ const DashBoard = ({ blogs ,user }) => {
         ""
       )}
 
-      {blogs.map((blog, index) => (
-        <div
-          key={index}
-          className="mt-10 sm:mx-auto sm:w-full sm:max-w-4xl p-3 bg-white rounded-md shadow-lg border border-gray-300 m-6"
-        >
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <div>
-              <Image
-                src={
-                  "https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg?auto=compress&cs=tinysrgb&w=600"
-                }
-                width={90}
-                height={100}
-                alt={`Picture of ${blog.title}`}
+      {blogs
+        .slice()
+        .reverse()
+        .map((blog, index) => (
+          <div
+            key={index}
+            className="mt-10 sm:mx-auto sm:w-full sm:max-w-4xl p-3 bg-white rounded-md shadow-lg border border-gray-300 m-6"
+          >
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <div>
+                <Image
+                  src={
+                    "https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg?auto=compress&cs=tinysrgb&w=600"
+                  }
+                  width={90}
+                  height={100}
+                  alt={`Picture of ${blog.title}`}
+                  style={{
+                    borderRadius: "10px",
+                  }}
+                />
+              </div>
+              <div
                 style={{
-                  borderRadius: "10px",
-                }}
-              />
-            </div>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                paddingLeft: "8px",
-              }}
-            >
-              <h1
-                style={{
-                  fontSize: "16px",
-                  fontWeight: "bolder",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  paddingLeft: "8px",
                 }}
               >
-                {blog.title}
-              </h1>
-              <span style={{
-                  fontSize: "10px",
-                  fontWeight: "lighter",
-                }}>{user.firstName} - {blog.dateTime}</span>
+                <h1
+                  style={{
+                    fontSize: "16px",
+                    fontWeight: "bolder",
+                    wordWrap: "break-word",
+                  }}
+                >
+                  {blog.title}
+                </h1>
+                <span
+                  style={{
+                    fontSize: "10px",
+                    fontWeight: "lighter",
+                  }}
+                >
+                  {user.firstName} - {blog.dateTime}
+                </span>
+              </div>
+            </div>
+            <br />
+            <div
+              style={{
+                wordWrap: "break-word",
+              }}
+            >
+              {blog.description}
             </div>
           </div>
-          <br />
-          <div>{blog.description}</div>
-        </div>
-      ))}
+        ))}
     </>
   );
 };
@@ -188,7 +207,6 @@ export default DashBoard;
 export async function getServerSideProps({ req }) {
   const session = await getSession({ req });
 
-  
   if (!session || !session.user || !session.user.email) {
     return {
       redirect: {
@@ -196,11 +214,11 @@ export async function getServerSideProps({ req }) {
         permanent: false,
       },
     };
-  } 
+  }
 
   const userEmail = session.user.email;
   const blogs = await userBlogs(userEmail);
-  const user = await getByEmail(userEmail)
+  const user = await getByEmail(userEmail);
 
   return {
     props: {
