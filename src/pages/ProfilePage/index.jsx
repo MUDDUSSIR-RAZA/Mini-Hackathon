@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Headings from "@/components/Headings";
 import MyHeader from "@/components/MyHeader";
 import Image from "next/image";
@@ -6,8 +6,22 @@ import { BsPen } from "react-icons/bs";
 import { getSession, signOut } from "next-auth/react";
 import { RxDashboard } from "react-icons/rx";
 import Link from "next/link";
+import { getByEmail } from "@/services/users";
 
-const ProfilePage = () => {
+const ProfilePage = ({ user }) => {
+  const [editingFirstName, setEditingFirstName] = useState(false);
+  const nameButton = () => {
+    setEditingFirstName(!editingFirstName);
+  };
+
+  const handleFirstNameChange = (event) => {
+    setNewFirstName(event.target.value);
+  };
+
+  const handleUpdateFirstName = async () => {
+    await updateFirstName(newFirstName);
+    setEditingFirstName(false);
+  };
   return (
     <>
       <MyHeader>
@@ -60,14 +74,19 @@ const ProfilePage = () => {
             padding: "20px 0px 0px 0px",
           }}
         >
-          <span>Muddussir Raza</span>
-          <span
-            style={{
-              marginLeft: "6px",
-            }}
-          >
+          {editingFirstName ? (
+            <input
+              type="text"
+              value={user.firstName}
+              onChange={(e) => user.setFirstName(e.target.value)}
+              // Other input attributes
+            />
+          ) : (
+            <span>{user.firstName}</span>
+          )}
+          <button onClick={nameButton} style={{ marginLeft: "6px" }}>
             <BsPen />
-          </span>
+          </button>
         </div>
         <br />
         <h1>PASSWORD</h1>
@@ -128,6 +147,7 @@ export default ProfilePage;
 
 export async function getServerSideProps({ req }) {
   const session = await getSession({ req });
+
   if (!session) {
     return {
       redirect: {
@@ -136,9 +156,12 @@ export async function getServerSideProps({ req }) {
       },
     };
   }
+  const userEmail = session.user.email;
+  const user = getByEmail(userEmail);
   return {
     props: {
       session,
+      user,
     },
   };
 }
