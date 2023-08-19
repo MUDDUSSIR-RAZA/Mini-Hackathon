@@ -1,5 +1,6 @@
 import Headings from "@/components/Headings";
 import MyHeader from "@/components/MyHeader";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useRef } from "react";
@@ -12,6 +13,11 @@ export default function Form() {
   const passwordRef = useRef();
   const repeatPasswordRef = useRef();
 
+  const { data } = useSession();
+  if (data) {
+    router.replace("/DashBoard");
+  }
+
   const onSubmitHandler = async (e) => {
     e.preventDefault();
     const firstName = firstNameRef.current.value;
@@ -19,7 +25,7 @@ export default function Form() {
     const email = emailRef.current.value;
     const password = passwordRef.current.value;
     const repeatPassword = repeatPasswordRef.current.value;
-  
+
     if (password !== repeatPassword) {
       alert("Both Password do not match.");
       return;
@@ -29,15 +35,15 @@ export default function Form() {
       alert("Password must have at least 8 characters.");
       return;
     }
-  
+
     const hasCapitalLetter = /[A-Z]/.test(password);
     const hasSmallLetter = /[a-z]/.test(password);
-  
+
     if (!hasCapitalLetter || !hasSmallLetter) {
       alert("Password must contain both capital and small letters.");
       return;
     }
-  
+
     const response = await fetch("/api/auth/signup", {
       method: "POST",
       body: JSON.stringify({ firstName, lastName, email, password }),
@@ -45,7 +51,7 @@ export default function Form() {
         "Content-Type": "application/json",
       },
     });
-  
+
     if (response.ok) {
       alert("Sign up Successful");
       router.replace("/auth/login");
@@ -74,11 +80,13 @@ export default function Form() {
                 <input
                   id="firstName"
                   name="firstName"
-                  type="firstName"
+                  type="text"
                   ref={firstNameRef}
                   placeholder="First Name"
-                  autoComplete="first-name"
+                  autoComplete="given-name"
                   required
+                  minLength="3"
+                  maxLength="20"
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 px-2 py-2"
                 />
               </div>
@@ -87,11 +95,13 @@ export default function Form() {
                 <input
                   id="lastName"
                   name="last-name"
-                  type="lastName"
+                  type="text"
                   ref={lastNameRef}
                   placeholder="Last Name"
-                  autoComplete="last-name"
+                  autoComplete="family-name"
                   required
+                  minLength="1"
+                  maxLength="20"
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 px-2 py-2"
                 />
               </div>
