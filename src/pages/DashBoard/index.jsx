@@ -10,7 +10,7 @@ import { useRouter } from "next/router";
 import { getByEmail } from "@/services/users";
 
 const DashBoard = ({ blogs ,user }) => {
-  const { data } = useSession();
+  
 
   const titleRef = useRef();
   const descriptionRef = useRef();
@@ -47,7 +47,7 @@ const DashBoard = ({ blogs ,user }) => {
     alert("Blog Publish Successfully");
   };
 
-  const router = useRouter();
+
 
   return (
     <>
@@ -192,11 +192,12 @@ export async function getServerSideProps({ req }) {
   if (!session || !session.user || !session.user.email) {
     return {
       redirect: {
-        destination: "/auth/login",
+        destination: "/auth/signup",
         permanent: false,
       },
     };
-  }
+  } 
+
   const userEmail = session.user.email;
   const blogs = await userBlogs(userEmail);
   const user = await getByEmail(userEmail)
