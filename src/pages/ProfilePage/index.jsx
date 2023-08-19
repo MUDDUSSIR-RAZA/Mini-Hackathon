@@ -156,6 +156,7 @@ export async function getServerSideProps({ req }) {
       },
     };
   }
+ 
   const userEmail = session.user.email;
   const user = getByEmail(userEmail);
   return {
