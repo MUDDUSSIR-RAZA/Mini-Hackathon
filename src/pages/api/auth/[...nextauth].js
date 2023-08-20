@@ -14,6 +14,8 @@ export const authOptions = {
           throw new Error("User not Found");
         }
         const isValid = await verifyPassword(user.password, password);
+        console.log(user.password, password);
+        console.log(isValid);
         if (!isValid) {
           throw new Error("Incorrect Password");
         }
