@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef } from "react";
 import Headings from "@/components/Headings";
 import MyHeader from "@/components/MyHeader";
 import { getSession, signOut, useSession } from "next-auth/react";
@@ -7,9 +7,22 @@ import Link from "next/link";
 import Image from "next/image";
 import { userBlogs } from "@/services/blogs";
 import { getByEmail } from "@/services/users";
+import { CiEdit } from "react-icons/ci";
+import { MdDelete } from "react-icons/md";
+import { v4 as uuidv4 } from "uuid";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useRouter } from "next/router";
 
 const DashBoard = ({ blogs, user }) => {
+  const router = useRouter();
   const { data } = useSession();
+
+  const close = () => {
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000)
+  }  
 
   const titleRef = useRef();
   const descriptionRef = useRef();
@@ -35,19 +48,52 @@ const DashBoard = ({ blogs, user }) => {
     e.preventDefault();
     const title = titleRef.current.value;
     const description = descriptionRef.current.value;
+    try {
+      const response = await fetch("/api/blogs/publishBlogs", {
+        method: "POST",
+        body: JSON.stringify({ title, description, dateTime, email: email() }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.ok) {
+        toast.success("Blog Published Successfully.");
+        close();
+      } else {
+        toast.error("Failed to Upload Blog");
+      }
+    } catch (error) {
+      toast.error("Error Uploading Blog: " + error.message);
+    }
+  };
 
-    const response = await fetch("/api/blogs/publishBlogs", {
-      method: "POST",
-      body: JSON.stringify({ title, description, dateTime, email: email() }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    alert("Blog Publish Successfully");
+  const handleDelete = async (id) => {
+    try {
+      const response = await fetch("/api/blogs/deleteItem", {
+        method: "DELETE",
+        body: JSON.stringify({
+          email: email(),
+          id,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        toast.success(`Blog deleted successfully.`);
+        close();
+      } else {
+        toast.error("Failed to delete Blog.");
+      }
+    } catch (error) {
+      toast.error("Error deleting Blog: " + error.message);
+    }
   };
 
   return (
     <>
+      <ToastContainer autoClose={1000} />
       <MyHeader name={user.firstName}>
         <Link
           style={{
@@ -143,18 +189,16 @@ const DashBoard = ({ blogs, user }) => {
         .reverse()
         .map((blog, index) => (
           <div
-            key={index}
+            key={uuidv4()}
             className="mt-10 sm:mx-auto sm:w-full sm:max-w-4xl p-3 bg-white rounded-md shadow-lg border border-gray-300 m-6"
           >
             <div style={{ display: "flex", alignItems: "center" }}>
               <div>
                 <Image
-                  src={
-                    "https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg?auto=compress&cs=tinysrgb&w=600"
-                  }
+                  src={user.picture}
                   width={90}
                   height={100}
-                  alt={`Picture of ${blog.title}`}
+                  alt="Profile Picture"
                   style={{
                     borderRadius: "10px",
                   }}
@@ -182,9 +226,10 @@ const DashBoard = ({ blogs, user }) => {
                   style={{
                     fontSize: "10px",
                     fontWeight: "lighter",
+                    paddingLeft: "10px",
                   }}
                 >
-                  {user.firstName} - {blog.dateTime}
+                  {user.firstName} <br /> {blog.dateTime}
                 </span>
               </div>
             </div>
@@ -195,6 +240,23 @@ const DashBoard = ({ blogs, user }) => {
               }}
             >
               {blog.description}
+            </div>
+            <br />
+            <div
+              style={{
+                display: "flex",
+                fontSize: "25px",
+                flexDirection: "row-reverse",
+                marginRight: "15px",
+              }}
+            >
+              <button onClick={() => handleDelete(blog.id)}>
+                <MdDelete />
+              </button>
+              {/* onClick={() => handleEdit(blog.id)} */}
+              {/* <button>
+                <CiEdit />
+              </button> */}
             </div>
           </div>
         ))}
