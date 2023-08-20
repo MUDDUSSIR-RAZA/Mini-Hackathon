@@ -4,8 +4,17 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useRef } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Form() {
+
+  const close = () => {
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
+  };
+
   const firstNameRef = useRef();
   const lastNameRef = useRef();
   const emailRef = useRef();
@@ -26,42 +35,49 @@ export default function Form() {
     const password = passwordRef.current.value;
     const repeatPassword = repeatPasswordRef.current.value;
 
+
     if (password !== repeatPassword) {
-      alert("Both Password do not match.");
+      toast.error("Both Passwords do not match.");
       return;
     }
-
+  
     if (password.length < 8) {
-      alert("Password must have at least 8 characters.");
+      toast.error("Password must have at least 8 characters.");
       return;
     }
-
+  
     const hasCapitalLetter = /[A-Z]/.test(password);
     const hasSmallLetter = /[a-z]/.test(password);
-
+  
     if (!hasCapitalLetter || !hasSmallLetter) {
-      alert("Password must contain both capital and small letters.");
+      toast.error("Password must contain both capital and small letters.");
       return;
     }
-
-    const response = await fetch("/api/auth/signup", {
-      method: "POST",
-      body: JSON.stringify({ firstName, lastName, email, password }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (response.ok) {
-      alert("Sign up Successful");
-      router.replace("/auth/login");
-    } else {
-      const data = await response.json();
-      alert(`Sign up failed: ${data.message}`);
+  
+    try {
+      const response = await fetch("/api/auth/signup", {
+        method: "POST",
+        body: JSON.stringify({ firstName, lastName, email, password }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+  
+      if (response.ok) {
+        toast.success("Sign up Successful");
+        router.replace("/auth/login");
+      } else {
+        const data = await response.json();
+        toast.error(`Sign up failed: ${data.message}`);
+      }
+    } catch (error) {
+      console.error("Error signing up:", error);
+      toast.error("An error occurred while signing up. Please try again later.");
     }
   };
   return (
     <>
+     <ToastContainer autoClose={1000} />
       <MyHeader>
         <Link href={"/auth/login"}>Log In</Link>
       </MyHeader>
