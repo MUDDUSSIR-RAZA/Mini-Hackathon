@@ -14,6 +14,5 @@ export default function handler(req, res) {
         save(firstName , lastName , email, password);
         res.status(201).send();
     } 
-
 }
   
