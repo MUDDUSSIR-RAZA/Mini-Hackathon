@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Headings from "@/components/Headings";
 import MyHeader from "@/components/MyHeader";
 import Image from "next/image";
@@ -7,13 +7,70 @@ import { getSession, signOut, useSession } from "next-auth/react";
 import { RxDashboard } from "react-icons/rx";
 import Link from "next/link";
 import { getByEmail } from "@/services/users";
+import { GrUpdate } from "react-icons/gr";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ProfilePage = ({ user }) => {
   const { data } = useSession();
+
+  const close = () => {
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
+  };
+
   function email() {
     const user = data?.user;
     return user?.email;
   }
+
+  const [selectedPicture, setSelectedPicture] = useState(null);
+  const [updatePic, setUpdatePic] = useState("");
+
+  const handlePictureChange = (event) => {
+    const selectedFile = event.target.files[0];
+    setSelectedPicture(selectedFile);
+
+    const reader = new FileReader();
+    reader.onload = function (event) {
+      const dataUrl = event.target.result;
+      setUpdatePic(dataUrl);
+    };
+    reader.readAsDataURL(selectedFile);
+  };
+
+  const handleUpdatePicture = async () => {
+    if (selectedPicture) {
+      try {
+        const response = await fetch("/api/blogs/updateProfilePics", {
+          method: "POST",
+          body: JSON.stringify({
+            updatePic,
+            email: email(),
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (response.ok) {
+          toast.success("Password Change Successful");
+          close();
+        } else {
+          const responseBody = await response.json();
+          const errorMessage = responseBody.errorMessage;
+          toast.error(errorMessage);
+          close();
+        }
+      } catch (error) {
+        toast.error(
+          "An error occurred while changing password. Please try again later."
+        );
+        close();
+      }
+    }
+  };
 
   const oldPasswordRef = useRef();
   const passwordRef = useRef();
@@ -26,12 +83,12 @@ const ProfilePage = ({ user }) => {
     const confirmPassword = confirmPasswordRef.current.value;
 
     if (password !== confirmPassword) {
-      alert("Both Password do not match.");
+      toast.error("Both Passwords do not match.");
       return;
     }
 
     if (password.length < 8) {
-      alert("Password must have at least 8 characters.");
+      toast.error("Password must have at least 8 characters.");
       return;
     }
 
@@ -39,7 +96,7 @@ const ProfilePage = ({ user }) => {
     const hasSmallLetter = /[a-z]/.test(password);
 
     if (!hasCapitalLetter || !hasSmallLetter) {
-      alert("Password must contain both capital and small letters.");
+      toast.error("Password must contain both capital and small letters.");
       return;
     }
 
@@ -58,45 +115,49 @@ const ProfilePage = ({ user }) => {
       });
 
       if (response.ok) {
-        alert("Password Change Successful");
+        toast.success("Password Change Successful");
+        close();
       } else {
         const responseBody = await response.json();
         const errorMessage = responseBody.errorMessage;
-        alert(errorMessage);
+        toast.error(errorMessage);
+        close();
       }
     } catch (error) {
-      console.error("Error changing password:", error);
-      alert(
-        "An error occurred while changing password. Please try again later: " +
-          error.message
+      toast.error(
+        "An error occurred while changing password. Please try again later."
       );
+      close();
     }
   };
 
-  const nameButton = async () => {
-    const nameChangeValue = nameChange.value;
-    try {
-      const response = await fetch("/api/blogs/editBlogs", {
-        method: "POST",
-        body: JSON.stringify({ nameChangeValue, email: email() }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (response.ok) {
-        alert("Name Change Successful");
-      } else {
-        alert("Name Change Failed");
+    const nameButton = async () => {
+      const nameChangeValue = nameChange.value;
+      try {
+        const response = await fetch("/api/blogs/editBlogs", {
+          method: "POST",
+          body: JSON.stringify({ nameChangeValue, email: email() }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        if (response.ok) {
+          toast.success("Name Change Successful");
+          close();
+        } else {
+          toast.error("Name Change Failed");
+          close();
+        }
+      } catch (err) {
+        toast.error("An error occurred while updating name");
+        close();
       }
-    } catch (error) {
-      console.error("Error updating name:", error);
-      alert("An error occurred while updating name");
-    }
-  };
+    };
 
   return (
     <>
-       <MyHeader name={user.firstName}>
+      <ToastContainer autoClose={1000} />
+      <MyHeader name={user.firstName}>
         <Link
           style={{
             marginRight: "8px",
@@ -112,11 +173,7 @@ const ProfilePage = ({ user }) => {
       <Headings headingName={"PROFILE PAGE"} />
 
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm p-8 bg-white rounded-md shadow-lg border border-gray-300">
-        <div
-          style={{
-            position: "relative",
-          }}
-        >
+        <div style={{ position: "relative" }}>
           <div
             style={{
               position: "absolute",
@@ -124,26 +181,59 @@ const ProfilePage = ({ user }) => {
               left: "40%",
               transform: "translate(-50%, -50%)",
               zIndex: 1,
+              cursor: "pointer",
             }}
           >
-            <BsPen />
+            <label htmlFor="profilePictureInput">
+              <BsPen />
+            </label>
+            <input
+              id="profilePictureInput"
+              type="file"
+              accept="image/*"
+              style={{ display: "none" }}
+              onChange={handlePictureChange}
+            />
           </div>
+
           <Image
-            src="https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg?auto=compress&cs=tinysrgb&w=600"
+            src={user.picture}
             width={150}
             height={120}
-            alt="Picture of the author"
+            alt="Profile Picture"
             style={{
               borderRadius: "10px",
             }}
           />
         </div>
+
+        {selectedPicture && (
+          <button
+            onClick={handleUpdatePicture}
+            style={{
+              backgroundColor: "#007bff", // Blue background color
+              color: "#fff", // White text color
+              border: "none",
+              borderRadius: "5px",
+              padding: "8px 8px",
+              cursor: "pointer",
+              fontWeight: "bold",
+              fontSize: "12px",
+              marginTop: "14px",
+              display: "flex",
+              flexDirection: "row",
+            }}
+          >
+            <GrUpdate />
+          </button>
+        )}
+
         <div
           style={{
             display: "flex",
             alignItems: "center",
             fontSize: "14px",
-            padding: "20px 0px 0px 0px",
+            padding: "12px 0px 0px 0px",
           }}
         >
           <div className="mt-2 py-1">
