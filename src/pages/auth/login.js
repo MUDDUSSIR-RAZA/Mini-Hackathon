@@ -4,8 +4,12 @@ import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useRef } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 export default function Form(email, password) {
+
   const router = useRouter();
   const { data } = useSession();
   if (data) {
@@ -19,20 +23,26 @@ export default function Form(email, password) {
     const email = emailRef.current.value;
     const password = passwordRef.current.value;
 
-    const response = await signIn("credentials", {
-      redirect: false,
-      email,
-      password,
-    });
-    if (response.ok) {
-      router.replace("/DashBoard");
-    } else {
-      console.error(response.error);
-      alert("User Not Exist");
+    try {
+      const response = await signIn("credentials", {
+        redirect: false,
+        email,
+        password,
+      });
+
+      if (response.ok) {
+        router.replace("/DashBoard");
+      } else {
+        console.error(response.error);
+        toast.error(response.error);
+      }
+    } catch (error) {
+      toast.error(error);
     }
-  };
+  }
   return (
     <>
+     <ToastContainer autoClose={1000} />
       <MyHeader>
         <Link href={"/auth/signup"}>Sign Up</Link>
       </MyHeader>
