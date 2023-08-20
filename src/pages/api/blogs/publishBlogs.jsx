@@ -1,4 +1,4 @@
-import { publishBlog, userBlogs } from "@/services/blogs";
+import { publishBlog } from "@/services/blogs";
 
 export default async function handler(req, res) {
   const { title, description, dateTime, email } = req.body;
