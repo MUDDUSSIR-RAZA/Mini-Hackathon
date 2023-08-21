@@ -224,9 +224,10 @@ const DashBoard = ({ blogs, user }) => {
                 </h1>
                 <span
                   style={{
-                    fontSize: "10px",
+                    fontSize: "12px",
                     fontWeight: "lighter",
                     paddingLeft: "10px",
+                    textAlign:"center"
                   }}
                 >
                   {user.firstName} <br /> {blog.dateTime}
