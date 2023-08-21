@@ -10,6 +10,24 @@ import { getByEmail } from "@/services/users";
 import { GrUpdate } from "react-icons/gr";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { updatePassword } from "../utils/passwordUpdate";
+import { updateProfilePicture } from "../utils/profileUpdate";
+import { updateName } from "../utils/nameUpdate";
+
+const validatePassword = (password) => {
+  if (password.length < 8) {
+    return 'Password must have at least 8 characters.';
+  }
+
+  const hasCapitalLetter = /[A-Z]/.test(password);
+  const hasSmallLetter = /[a-z]/.test(password);
+
+  if (!hasCapitalLetter || !hasSmallLetter) {
+    return 'Password must contain both capital and small letters.';
+  }
+
+  return null;
+};
 
 const ProfilePage = ({ user }) => {
   const { data } = useSession();
@@ -43,30 +61,11 @@ const ProfilePage = ({ user }) => {
   const handleUpdatePicture = async () => {
     if (selectedPicture) {
       try {
-        const response = await fetch("/api/blogs/updateProfilePics", {
-          method: "POST",
-          body: JSON.stringify({
-            updatePic,
-            email: email(),
-          }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (response.ok) {
-          toast.success("Password Change Successful");
-          close();
-        } else {
-          const responseBody = await response.json();
-          const errorMessage = responseBody.errorMessage;
-          toast.error(errorMessage);
-          close();
-        }
+        const pictureChangeResult = await updateProfilePicture(selectedPicture, updatePic, email());
+        toast[pictureChangeResult === "Picture Update Successful" ? "success" : "error"](pictureChangeResult);
+        close();
       } catch (error) {
-        toast.error(
-          "An error occurred while changing password. Please try again later."
-        );
+        toast.error("An error occurred while changing the picture. Please try again later.");
         close();
       }
     }
@@ -78,81 +77,38 @@ const ProfilePage = ({ user }) => {
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
+
     const oldPassword = oldPasswordRef.current.value;
     const password = passwordRef.current.value;
     const confirmPassword = confirmPasswordRef.current.value;
 
-    if (password !== confirmPassword) {
-      toast.error("Both Passwords do not match.");
+    const passwordValidationMessage = validatePassword(password);
+    if (password !== confirmPassword || passwordValidationMessage) {
+      toast.error(passwordValidationMessage || 'Both passwords do not match.');
       return;
     }
 
-    if (password.length < 8) {
-      toast.error("Password must have at least 8 characters.");
-      return;
-    }
-
-    const hasCapitalLetter = /[A-Z]/.test(password);
-    const hasSmallLetter = /[a-z]/.test(password);
-
-    if (!hasCapitalLetter || !hasSmallLetter) {
-      toast.error("Password must contain both capital and small letters.");
-      return;
-    }
-
-    try {
-      const response = await fetch("/api/blogs/editUserPassword", {
-        method: "POST",
-        body: JSON.stringify({
-          hashedPassword: user.password,
-          oldPassword,
-          newPassword: password,
-          email: email(),
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (response.ok) {
-        toast.success("Password Change Successful");
-        close();
-      } else {
-        const responseBody = await response.json();
-        const errorMessage = responseBody.errorMessage;
-        toast.error(errorMessage);
-        close();
-      }
+     try {
+      const passwordChangeResult = await updatePassword(oldPassword, password, email(), user);
+      toast[passwordChangeResult === "Password Change Successful" ? "success" : "error"](passwordChangeResult);
+      close();
     } catch (error) {
-      toast.error(
-        "An error occurred while changing password. Please try again later."
-      );
+      toast.error("An error occurred while changing the password. Please try again later.");
       close();
     }
   };
 
-    const nameButton = async () => {
-      const nameChangeValue = nameChange.value;
-      try {
-        const response = await fetch("/api/blogs/editBlogs", {
-          method: "POST",
-          body: JSON.stringify({ nameChangeValue, email: email() }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        if (response.ok) {
-          toast.success("Name Change Successful");
-          close();
-        } else {
-          toast.error("Name Change Failed");
-          close();
-        }
-      } catch (err) {
-        toast.error("An error occurred while updating name");
-        close();
-      }
-    };
+  const nameButton = async () => {
+    const nameChangeValue = nameChange.value;
+    try {
+      const nameChangeResult = await updateName(nameChangeValue, email());
+      toast[nameChangeResult === "Name Change Successful" ? "success" : "error"](nameChangeResult);
+      close();
+    } catch (err) {
+      toast.error("An error occurred while updating the name");
+      close();
+    }
+  };
 
   return (
     <>
@@ -326,7 +282,7 @@ export async function getServerSideProps({ req }) {
   if (!session) {
     return {
       redirect: {
-        destination: "/auth/login",
+        destination: "/auth/signup",
         permanent: false,
       },
     };
