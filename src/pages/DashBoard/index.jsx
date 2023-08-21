@@ -187,7 +187,7 @@ const DashBoard = ({ blogs, user }) => {
       {blogs
         .slice()
         .reverse()
-        .map((blog, index) => (
+        .map(blog => (
           <div
             key={uuidv4()}
             className="mt-10 sm:mx-auto sm:w-full sm:max-w-4xl p-3 bg-white rounded-md shadow-lg border border-gray-300 m-6"
