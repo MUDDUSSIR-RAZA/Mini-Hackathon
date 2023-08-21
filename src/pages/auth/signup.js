@@ -1,20 +1,29 @@
-import Headings from "@/components/Headings";
-import MyHeader from "@/components/MyHeader";
-import { useSession } from "next-auth/react";
-import Link from "next/link";
-import { useRouter } from "next/router";
-import { useRef } from "react";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { useRef } from 'react';
+import { useRouter } from 'next/router';
+import { getSession, useSession } from 'next-auth/react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import MyHeader from '@/components/MyHeader';
+import Link from 'next/link';
+import Headings from '@/components/Headings';
+import { signupUser } from '../utils/signupUser';
 
-export default function Form() {
+const validatePassword = (password) => {
+  if (password.length < 8) {
+    return 'Password must have at least 8 characters.';
+  }
 
-  const close = () => {
-    setTimeout(() => {
-      window.location.reload();
-    }, 1000);
-  };
+  const hasCapitalLetter = /[A-Z]/.test(password);
+  const hasSmallLetter = /[a-z]/.test(password);
 
+  if (!hasCapitalLetter || !hasSmallLetter) {
+    return 'Password must contain both capital and small letters.';
+  }
+
+  return null;
+};
+
+export default function signup() {
   const firstNameRef = useRef();
   const lastNameRef = useRef();
   const emailRef = useRef();
@@ -22,57 +31,34 @@ export default function Form() {
   const passwordRef = useRef();
   const repeatPasswordRef = useRef();
 
+
   const { data } = useSession();
   if (data) {
-    router.replace("/DashBoard");
+    router.replace('/DashBoard')
   }
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
+
     const firstName = firstNameRef.current.value;
     const lastName = lastNameRef.current.value;
     const email = emailRef.current.value;
     const password = passwordRef.current.value;
     const repeatPassword = repeatPasswordRef.current.value;
 
-
-    if (password !== repeatPassword) {
-      toast.error("Both Passwords do not match.");
-      return;
-    }
-  
-    if (password.length < 8) {
-      toast.error("Password must have at least 8 characters.");
-      return;
-    }
-  
-    const hasCapitalLetter = /[A-Z]/.test(password);
-    const hasSmallLetter = /[a-z]/.test(password);
-  
-    if (!hasCapitalLetter || !hasSmallLetter) {
-      toast.error("Password must contain both capital and small letters.");
+    const passwordValidationMessage = validatePassword(password);
+    if (password !== repeatPassword || passwordValidationMessage) {
+      toast.error(passwordValidationMessage || 'Both passwords do not match.');
       return;
     }
   
     try {
-      const response = await fetch("/api/auth/signup", {
-        method: "POST",
-        body: JSON.stringify({ firstName, lastName, email, password }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-  
-      if (response.ok) {
-        toast.success("Sign up Successful");
-        router.replace("/auth/login");
-      } else {
-        const data = await response.json();
-        toast.error(`Sign up failed: ${data.message}`);
-      }
+      await signupUser({ firstName, lastName, email, password });
+      console.log({ firstName, lastName, email, password });
+      toast.success('Sign up Successful');
+     router.replace('/auth/login')
     } catch (error) {
-      console.error("Error signing up:", error);
-      toast.error("An error occurred while signing up. Please try again later.");
+      toast.error(error);
     }
   };
   return (
@@ -81,7 +67,7 @@ export default function Form() {
       <MyHeader>
         <Link href={"/auth/login"}>Log In</Link>
       </MyHeader>
-      <Headings headingName={"SIGNUP PAGE"} />
+      <Headings headingName={"SIGNUP"} />
       <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
           <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
@@ -175,4 +161,24 @@ export default function Form() {
       </div>
     </>
   );
+}
+
+
+export async function getServerSideProps({ req }) {
+  const session = await getSession({ req });
+
+  if (session) {
+    return {
+      redirect: {
+        destination: "/DashBoard",
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {
+      session,
+    },
+  };
 }
