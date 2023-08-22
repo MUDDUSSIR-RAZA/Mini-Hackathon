@@ -13,15 +13,17 @@ import "react-toastify/dist/ReactToastify.css";
 import { updatePassword } from "../utils/passwordUpdate";
 import { updateProfilePicture } from "../utils/profileUpdate";
 import { updateName } from "../utils/nameUpdate";
+import { useRouter } from "next/router";
 
 const validatePassword = (password) => {
+  
   if (password.length < 8) {
     return 'Password must have at least 8 characters.';
   }
 
   const hasCapitalLetter = /[A-Z]/.test(password);
   const hasSmallLetter = /[a-z]/.test(password);
-
+  
   if (!hasCapitalLetter || !hasSmallLetter) {
     return 'Password must contain both capital and small letters.';
   }
@@ -30,6 +32,7 @@ const validatePassword = (password) => {
 };
 
 const ProfilePage = ({ user }) => {
+  const router = useRouter()
   const { data } = useSession();
 
   const close = () => {
@@ -124,7 +127,14 @@ const ProfilePage = ({ user }) => {
         >
           <RxDashboard />
         </Link>
-        <button onClick={signOut}>Log Out</button>
+        <button
+          onClick={async () => {
+            router.replace("/allBlogs");
+            await signOut();
+          }}
+        >
+          Log Out
+        </button>
       </MyHeader>
       <Headings headingName={"PROFILE PAGE"} />
 
@@ -282,7 +292,7 @@ export async function getServerSideProps({ req }) {
   if (!session) {
     return {
       redirect: {
-        destination: "/auth/signup",
+        destination: "/allBlogs",
         permanent: false,
       },
     };
