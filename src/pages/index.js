@@ -18,7 +18,7 @@ export async function getServerSideProps({ req }) {
   if (!session) {
     return {
       redirect: {
-        destination: "/auth/signup",
+        destination: "/allBlogs",
         permanent: false,
       },
     };
