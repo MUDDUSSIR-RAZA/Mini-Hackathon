@@ -20,6 +20,12 @@ export function getByEmail(email) {
   return data.find((p) => p.email.toLowerCase() === email.toLowerCase());
 }
 
+
+export function getById(id) {
+  const data = getAll();
+  return data.find((p) => p.id === id);
+}
+
 export async function verifyPassword(hashedPassword, password) {
   try {
     const isValid = await compare(password, hashedPassword);
