@@ -5,16 +5,41 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-export default function allBlogs({ user }) {
+export default function allBlogs() {
+  
+  const [isNoBlogsToastShown, setIsNoBlogsToastShown] = useState(false);
+  
   const [blogs, setBlogs] = useState([]);
-
   useEffect(() => {
-    fetch("/api/blogs/allBlogsApi")
-      .then((response) => response.json())
-      .then((data) => setBlogs(data))
-      .catch((error) => console.error("Error fetching blogs:", error));
+    const fetchData = async () => {
+      try {
+        const response = await fetch("/api/blogs/allBlogsApi");
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+          if (data.length === 0 && !isNoBlogsToastShown) {
+            toast.info("No blogs to display.", {
+              position: toast.POSITION.BOTTOM_CENTER,
+            });
+            setIsNoBlogsToastShown(true);
+            setBlogs(data);
+          }
+
+        
+        setBlogs(data);
+      } catch (error) {
+        console.error("Error fetching blogs:", error);
+      }
+    };
+  
+    fetchData();
   }, []);
+  
 
   const parseDate = (dateString) => {
     const months = [
@@ -47,7 +72,7 @@ export default function allBlogs({ user }) {
 
     return new Date(year, month, day, hour, minutes).getTime();
   };
-
+  
   let allBlogs = [];
   blogs.forEach((author) => {
     author.blogs.forEach((blog) => {
@@ -62,45 +87,57 @@ export default function allBlogs({ user }) {
       });
     });
   });
+  
 
-  console.log(allBlogs);
-
+  
   allBlogs.sort((a, b) => b.timeCheck - a.timeCheck);
   return (
     <>
-      <MyHeader>
-        <Link
-          style={{
-            marginRight: "15px",
-            alignSelf: "center",
-          }}
-          href={"/auth/signup"}
-        >
-          Sign up
-        </Link>
-        <Link
-          style={{
-            marginRight: "8px",
-            alignSelf: "center",
-          }}
-          href={"/auth/login"}
-        >
-          Login
-        </Link>
-      </MyHeader>
-      <Headings headingName={"All BLOGS"} />
-      <div>
+    <ToastContainer autoClose={2000} />
+    <MyHeader>
+      <Link
+        style={{
+          marginRight: "15px",
+          alignSelf: "center",
+        }}
+        href={"/auth/signup"}
+      >
+        Sign up
+      </Link>
+      <Link
+        style={{
+          marginRight: "8px",
+          alignSelf: "center",
+        }}
+        href={"/auth/login"}
+      >
+        Login
+      </Link>
+    </MyHeader>
+    <Headings headingName={"All BLOGS"} />
+    <div>
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-4xl p-3 bg-white rounded-md shadow-lg border border-gray-300 m-6">
-          <h1
-            style={{
-              fontSize: "16",
-              fontWeight: "bolder",
-            }}
-          >
-            All Blogs
-          </h1>
+        <h1
+          style={{
+            fontSize: "16",
+            fontWeight: "bolder",
+          }}
+        >
+          All Blogs
+        </h1>
+      </div>
+      {allBlogs.length === 0 ? (
+        // Display this section if there are no blogs
+        <div
+          className="mt-10 sm:mx-auto sm:w-full sm:max-w-4xl p-3 bg-white rounded-md shadow-lg border border-gray-300 m-6"
+          style={{
+            textAlign: "center",
+          }}
+        >
+          <p>No blogs to display.</p>
         </div>
-        {allBlogs.map((blog) => (
+      ) : (
+        allBlogs.map((blog) => (
           <div
             key={uuidv4()}
             className="mt-10 sm:mx-auto sm:w-full sm:max-w-4xl p-3 bg-white rounded-md shadow-lg border border-gray-300 m-6"
@@ -167,7 +204,8 @@ export default function allBlogs({ user }) {
               </Link>
             </div>
           </div>
-        ))}
+        ))
+      )}
       </div>
     </>
   );
