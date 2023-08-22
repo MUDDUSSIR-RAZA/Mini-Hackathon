@@ -65,7 +65,24 @@ export default function signup() {
     <>
      <ToastContainer autoClose={1000} />
       <MyHeader>
-        <Link href={"/auth/login"}>Log In</Link>
+      <Link
+          style={{
+            marginRight: "15px",
+            alignSelf: "center",
+          }}
+          href={"/allBlogs"}
+        >
+         All Blogs
+        </Link>
+        <Link
+          style={{
+            marginRight: "8px",
+            alignSelf: "center",
+          }}
+          href={"/auth/login"}
+        >
+          Login
+        </Link>
       </MyHeader>
       <Headings headingName={"SIGNUP"} />
       <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
