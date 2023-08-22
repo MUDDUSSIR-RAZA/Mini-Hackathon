@@ -126,11 +126,18 @@ export async function getServerSideProps({ params ,req }) {
     };
   }
 
-  if (userId) {
-    const user = getById(userId);
+  const user = getById(userId);
+  if (user) {
     return {
       props: {
         user,
+      },
+    };
+  } else {
+    return {
+      redirect: {
+        destination: "/allBlogs",
+        permanent: false,
       },
     };
   }
