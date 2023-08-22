@@ -108,7 +108,7 @@ const DashBoard = ({ blogs, user }) => {
         <button
           onClick={async () => {
             await signOut();
-            router.replace("/auth/login");
+            router.replace("/allBlogs");
           }}
         >
           Log Out
@@ -273,7 +273,7 @@ export async function getServerSideProps({ req }) {
   if (!session || !session.user || !session.user.email) {
     return {
       redirect: {
-        destination: "/auth/signup",
+        destination: "/allBlogs",
         permanent: false,
       },
     };
